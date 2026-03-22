@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:maze_core/maze_core.dart';
 
-class HomeScreen extends StatelessWidget {
+import '../providers/game_provider.dart';
+
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -38,7 +43,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const Spacer(),
               FilledButton.icon(
-                onPressed: () => _startQuickPlay(context),
+                onPressed: () => _startQuickPlay(context, ref),
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('Quick Play'),
                 style: FilledButton.styleFrom(
@@ -47,7 +52,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                onPressed: () => _startCustomPlay(context),
+                onPressed: () => context.go('/new-maze'),
                 icon: const Icon(Icons.tune),
                 label: const Text('Custom Maze'),
                 style: OutlinedButton.styleFrom(
@@ -62,17 +67,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _startQuickPlay(BuildContext context) {
-    // TODO: Navigate to play screen with a default config.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Play screen coming soon')),
+  void _startQuickPlay(BuildContext context, WidgetRef ref) {
+    const config = MazeConfig(
+      cellType: CellType.square,
+      rows: 12,
+      columns: 12,
+      difficulty: DifficultyLevel.medium,
+      algorithm: Algorithm.recursiveBacktracker,
     );
-  }
-
-  void _startCustomPlay(BuildContext context) {
-    // TODO: Navigate to maze configuration screen.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Custom maze coming soon')),
-    );
+    ref.read(gameProvider.notifier).newGame(config);
+    context.go('/play');
   }
 }

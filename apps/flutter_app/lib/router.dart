@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'screens/home_screen.dart';
+import 'screens/new_maze_screen.dart';
 import 'screens/play_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/stats_screen.dart';
@@ -31,6 +32,10 @@ final router = GoRouter(
           ),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/new-maze',
+      builder: (context, state) => const NewMazeScreen(),
     ),
     GoRoute(
       path: '/play',
