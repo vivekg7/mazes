@@ -1,0 +1,16 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  errors:
+    missing_return: error
+    dead_code: warning
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - require_trailing_commas
+    - sort_child_properties_last
+    - unawaited_futures
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - avoid_print

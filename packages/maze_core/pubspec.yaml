@@ -1,0 +1,13 @@
+name: maze_core
+description: Core maze generation, solving, and scoring logic.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+resolution: workspace
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^6.0.0
