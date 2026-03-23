@@ -2,7 +2,7 @@ import 'solve_record.dart';
 
 /// Interface for persisting solve records.
 ///
-/// The Flutter app implements this with local storage (e.g., Hive, Isar).
+/// The Flutter app implements this with JSON files in the documents directory.
 /// The core package only defines the interface.
 abstract class StatsRepository {
   /// Saves a solve record.

@@ -128,9 +128,10 @@ Each algorithm:
 ## Phase 10: Flutter App — Foundation (`apps/flutter_app/`)
 
 - [ ] App shell with navigation (home, play, stats, settings)
-- [ ] State management setup (Riverpod or Bloc — decide before starting)
-- [ ] Local storage for saved mazes, bookmarks, stats (Hive, Isar, or drift)
+- [ ] State management with `ChangeNotifier` + `ListenableBuilder`
+- [ ] Local storage via JSON files in application documents directory (`path_provider`)
 - [ ] Theme setup (light + dark mode)
+- [ ] Imperative navigation with `Navigator.push` + `MaterialPageRoute`
 
 ---
 
