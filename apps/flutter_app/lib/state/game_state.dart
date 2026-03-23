@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:maze_core/maze_core.dart';
 
 /// The complete state of a maze game in progress.
@@ -69,27 +69,22 @@ class GameState {
 }
 
 /// Manages the game state for the current maze.
-class GameNotifier extends StateNotifier<GameState?> {
-  GameNotifier() : super(null);
+class GameNotifier extends ChangeNotifier {
+  GameState? _state;
+  GameState? get state => _state;
 
   /// Generates a new maze and initializes the game state.
   void newGame(MazeConfig config) {
     final rng = Random(config.seed);
 
-    // Create the grid.
     final grid = _createGrid(config);
-
-    // Select and run the generator.
     final generator = _createGenerator(config.algorithm);
     generator.generate(grid, rng);
 
-    // Pick start and end cells (opposite corners or farthest pair).
     final longest = longestPath(grid.cells.first);
-
-    // Solve.
     final solution = solveMaze(longest.start, longest.end);
 
-    state = GameState(
+    _state = GameState(
       config: config,
       grid: grid,
       startCell: longest.start,
@@ -105,22 +100,25 @@ class GameNotifier extends StateNotifier<GameState?> {
       wallMarks: const {},
       showSolution: false,
     );
+    notifyListeners();
   }
 
   /// Handles player moving to a cell (tap or drag).
   void moveToCell(Cell cell) {
-    final s = state;
+    final s = _state;
     if (s == null || s.isCompleted || s.isPaused) return;
 
     final currentPath = s.playerPath;
 
     // Retrace: if the cell is the second-to-last in path, undo last move.
-    if (currentPath.length >= 2 && currentPath[currentPath.length - 2] == cell) {
+    if (currentPath.length >= 2 &&
+        currentPath[currentPath.length - 2] == cell) {
       final newPath = List<Cell>.from(currentPath)..removeLast();
-      state = s.copyWith(
+      _state = s.copyWith(
         playerPath: newPath,
         undoStack: [...s.undoStack, currentPath],
       );
+      notifyListeners();
       return;
     }
 
@@ -128,70 +126,77 @@ class GameNotifier extends StateNotifier<GameState?> {
     final current = currentPath.last;
     if (!current.isLinked(cell)) return;
 
-    // Don't allow revisiting cells already in the path (except retrace above).
+    // Don't allow revisiting cells already in the path.
     if (currentPath.contains(cell)) return;
 
     final newPath = [...currentPath, cell];
-    state = s.copyWith(
+    _state = s.copyWith(
       playerPath: newPath,
       undoStack: [...s.undoStack, currentPath],
     );
 
     // Check for completion.
     if (cell == s.endCell) {
-      state = state!.copyWith(isCompleted: true);
+      _state = _state!.copyWith(isCompleted: true);
     }
+    notifyListeners();
   }
 
   /// Undo the last move.
   void undo() {
-    final s = state;
+    final s = _state;
     if (s == null || s.undoStack.isEmpty) return;
 
     final previousPath = s.undoStack.last;
     final newUndo = List<List<Cell>>.from(s.undoStack)..removeLast();
-    state = s.copyWith(playerPath: previousPath, undoStack: newUndo);
+    _state = s.copyWith(playerPath: previousPath, undoStack: newUndo);
+    notifyListeners();
   }
 
   /// Update elapsed time (called by timer).
   void tick(int ms) {
-    final s = state;
+    final s = _state;
     if (s == null || s.isPaused || s.isCompleted) return;
-    state = s.copyWith(elapsedMs: s.elapsedMs + ms);
+    _state = s.copyWith(elapsedMs: s.elapsedMs + ms);
+    notifyListeners();
   }
 
   void togglePause() {
-    if (state != null) {
-      state = state!.copyWith(isPaused: !state!.isPaused);
+    if (_state != null) {
+      _state = _state!.copyWith(isPaused: !_state!.isPaused);
+      notifyListeners();
     }
   }
 
   void toggleFogOfWar({int radius = 3}) {
-    if (state == null) return;
-    state = state!.copyWith(
-      fogOfWarRadius: () => state!.fogOfWarRadius == null ? radius : null,
+    if (_state == null) return;
+    _state = _state!.copyWith(
+      fogOfWarRadius: () => _state!.fogOfWarRadius == null ? radius : null,
     );
+    notifyListeners();
   }
 
   void setFogRadius(int radius) {
-    if (state == null) return;
-    state = state!.copyWith(fogOfWarRadius: () => radius);
+    if (_state == null) return;
+    _state = _state!.copyWith(fogOfWarRadius: () => radius);
+    notifyListeners();
   }
 
   void toggleBreadcrumb(Cell cell) {
-    if (state == null) return;
-    final crumbs = Set<Cell>.from(state!.breadcrumbs);
+    if (_state == null) return;
+    final crumbs = Set<Cell>.from(_state!.breadcrumbs);
     if (crumbs.contains(cell)) {
       crumbs.remove(cell);
     } else {
       crumbs.add(cell);
     }
-    state = state!.copyWith(breadcrumbs: crumbs);
+    _state = _state!.copyWith(breadcrumbs: crumbs);
+    notifyListeners();
   }
 
   void toggleWallMark(Cell cell, Cell neighbor) {
-    if (state == null) return;
-    final marks = Map<Cell, Set<Cell>>.from(state!.wallMarks);
+    if (_state == null) return;
+    final marks = Map<Cell, Set<Cell>>.from(_state!.wallMarks);
     final cellMarks = Set<Cell>.from(marks[cell] ?? {});
     if (cellMarks.contains(neighbor)) {
       cellMarks.remove(neighbor);
@@ -199,12 +204,14 @@ class GameNotifier extends StateNotifier<GameState?> {
       cellMarks.add(neighbor);
     }
     marks[cell] = cellMarks;
-    state = state!.copyWith(wallMarks: marks);
+    _state = _state!.copyWith(wallMarks: marks);
+    notifyListeners();
   }
 
   void toggleSolution() {
-    if (state == null) return;
-    state = state!.copyWith(showSolution: !state!.showSolution);
+    if (_state == null) return;
+    _state = _state!.copyWith(showSolution: !_state!.showSolution);
+    notifyListeners();
   }
 
   Grid _createGrid(MazeConfig config) {
@@ -240,7 +247,3 @@ class GameNotifier extends StateNotifier<GameState?> {
     };
   }
 }
-
-final gameProvider = StateNotifierProvider<GameNotifier, GameState?>((ref) {
-  return GameNotifier();
-});

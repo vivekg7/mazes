@@ -2,24 +2,32 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:maze_core/maze_core.dart';
 
-import '../providers/game_provider.dart';
+import '../services/storage_service.dart';
+import '../state/game_state.dart';
 import '../widgets/maze_painter.dart';
 import '../widgets/maze_widget.dart';
 
-class PlayScreen extends ConsumerStatefulWidget {
-  const PlayScreen({super.key});
+class PlayScreen extends StatefulWidget {
+  const PlayScreen({
+    super.key,
+    required this.storage,
+    required this.gameNotifier,
+  });
+
+  final StorageService storage;
+  final GameNotifier gameNotifier;
 
   @override
-  ConsumerState<PlayScreen> createState() => _PlayScreenState();
+  State<PlayScreen> createState() => _PlayScreenState();
 }
 
-class _PlayScreenState extends ConsumerState<PlayScreen> {
+class _PlayScreenState extends State<PlayScreen> {
   Timer? _timer;
   _ToolMode _toolMode = _ToolMode.path;
+
+  GameNotifier get _game => widget.gameNotifier;
 
   @override
   void initState() {
@@ -35,121 +43,119 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(milliseconds: 100), (_) {
-      ref.read(gameProvider.notifier).tick(100);
+      _game.tick(100);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final game = ref.watch(gameProvider);
-    if (game == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Play')),
-        body: const Center(child: Text('No maze loaded')),
-      );
-    }
+    return ListenableBuilder(
+      listenable: _game,
+      builder: (context, _) {
+        final game = _game.state;
+        if (game == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Play')),
+            body: const Center(child: Text('No maze loaded')),
+          );
+        }
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.go('/'),
-        ),
-        title: _TimerDisplay(elapsedMs: game.elapsedMs),
-        actions: [
-          IconButton(
-            icon: Icon(game.isPaused ? Icons.play_arrow : Icons.pause),
-            onPressed: () => ref.read(gameProvider.notifier).togglePause(),
-            tooltip: game.isPaused ? 'Resume' : 'Pause',
-          ),
-          IconButton(
-            icon: const Icon(Icons.undo),
-            onPressed: game.undoStack.isNotEmpty
-                ? () => ref.read(gameProvider.notifier).undo()
-                : null,
-            tooltip: 'Undo',
-          ),
-        ],
-      ),
-      body: KeyboardListener(
-        focusNode: FocusNode()..requestFocus(),
-        onKeyEvent: (event) => _handleKeyEvent(event, game),
-        child: Column(
-          children: [
-            // Maze area.
-            Expanded(
-              child: game.isPaused
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.pause_circle_outline,
-                            size: 64,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Paused',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ],
-                      ),
-                    )
-                  : MazeWidget(
-                      renderState: MazeRenderState(
-                        grid: game.grid,
-                        startCell: game.startCell,
-                        endCell: game.endCell,
-                        playerPath: game.playerPath,
-                        solution: game.solution,
-                        showSolution: game.showSolution,
-                        fogOfWarRadius: game.fogOfWarRadius,
-                        fogOfWarCenter: game.playerPath.isNotEmpty
-                            ? game.playerPath.last
-                            : null,
-                        breadcrumbs: game.breadcrumbs,
-                        wallMarks: game.wallMarks,
-                      ),
-                      onCellTap: (cell) => _onCellInteraction(cell, game),
-                      onCellDrag: (cell) => _onCellInteraction(cell, game),
-                    ),
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-
-            // Toolbar.
-            _Toolbar(
-              toolMode: _toolMode,
-              onToolChanged: (mode) => setState(() => _toolMode = mode),
-              fogEnabled: game.fogOfWarRadius != null,
-              onFogToggle: () =>
-                  ref.read(gameProvider.notifier).toggleFogOfWar(),
-              solutionVisible: game.showSolution,
-              onSolutionToggle: () =>
-                  ref.read(gameProvider.notifier).toggleSolution(),
+            title: _TimerDisplay(elapsedMs: game.elapsedMs),
+            actions: [
+              IconButton(
+                icon: Icon(game.isPaused ? Icons.play_arrow : Icons.pause),
+                onPressed: () => _game.togglePause(),
+                tooltip: game.isPaused ? 'Resume' : 'Pause',
+              ),
+              IconButton(
+                icon: const Icon(Icons.undo),
+                onPressed:
+                    game.undoStack.isNotEmpty ? () => _game.undo() : null,
+                tooltip: 'Undo',
+              ),
+            ],
+          ),
+          body: KeyboardListener(
+            focusNode: FocusNode()..requestFocus(),
+            onKeyEvent: (event) => _handleKeyEvent(event, game),
+            child: Column(
+              children: [
+                Expanded(
+                  child: game.isPaused
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.pause_circle_outline,
+                                size: 64,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Paused',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                            ],
+                          ),
+                        )
+                      : MazeWidget(
+                          renderState: MazeRenderState(
+                            grid: game.grid,
+                            startCell: game.startCell,
+                            endCell: game.endCell,
+                            playerPath: game.playerPath,
+                            solution: game.solution,
+                            showSolution: game.showSolution,
+                            fogOfWarRadius: game.fogOfWarRadius,
+                            fogOfWarCenter: game.playerPath.isNotEmpty
+                                ? game.playerPath.last
+                                : null,
+                            breadcrumbs: game.breadcrumbs,
+                            wallMarks: game.wallMarks,
+                          ),
+                          onCellTap: (cell) =>
+                              _onCellInteraction(cell, game),
+                          onCellDrag: (cell) =>
+                              _onCellInteraction(cell, game),
+                        ),
+                ),
+                _Toolbar(
+                  toolMode: _toolMode,
+                  onToolChanged: (mode) => setState(() => _toolMode = mode),
+                  fogEnabled: game.fogOfWarRadius != null,
+                  onFogToggle: () => _game.toggleFogOfWar(),
+                  solutionVisible: game.showSolution,
+                  onSolutionToggle: () => _game.toggleSolution(),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   void _onCellInteraction(Cell cell, GameState game) {
     switch (_toolMode) {
       case _ToolMode.path:
-        ref.read(gameProvider.notifier).moveToCell(cell);
-        // Check for completion after move.
-        final updated = ref.read(gameProvider);
+        _game.moveToCell(cell);
+        final updated = _game.state;
         if (updated != null && updated.isCompleted) {
           _showCompletionDialog(updated);
         }
       case _ToolMode.breadcrumb:
-        ref.read(gameProvider.notifier).toggleBreadcrumb(cell);
+        _game.toggleBreadcrumb(cell);
       case _ToolMode.wallMark:
-        // For wall marks, mark the wall between the last path cell and this cell.
         if (game.playerPath.isNotEmpty) {
-          ref
-              .read(gameProvider.notifier)
-              .toggleWallMark(game.playerPath.last, cell);
+          _game.toggleWallMark(game.playerPath.last, cell);
         }
     }
   }
@@ -160,7 +166,6 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
 
     final current = game.playerPath.last;
 
-    // Find neighbors in cardinal directions for square grids.
     Cell? target;
     if (current is SquareCell) {
       target = switch (event.logicalKey) {
@@ -173,8 +178,8 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
     }
 
     if (target != null && current.isLinked(target)) {
-      ref.read(gameProvider.notifier).moveToCell(target);
-      final updated = ref.read(gameProvider);
+      _game.moveToCell(target);
+      final updated = _game.state;
       if (updated != null && updated.isCompleted) {
         _showCompletionDialog(updated);
       }
@@ -191,7 +196,7 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Maze Complete!'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -199,12 +204,8 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
           children: [
             Text('Time: ${minutes}m ${seconds}s'),
             const SizedBox(height: 8),
-            Text(
-              'Your path: ${game.playerPath.length - 1} steps',
-            ),
-            Text(
-              'Shortest path: ${game.solution.steps} steps',
-            ),
+            Text('Your path: ${game.playerPath.length - 1} steps'),
+            Text('Shortest path: ${game.solution.steps} steps'),
             const SizedBox(height: 8),
             Text(
               'Efficiency: ${((game.solution.steps / (game.playerPath.length - 1)) * 100).toStringAsFixed(0)}%',
@@ -214,16 +215,15 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
         actions: [
           TextButton(
             onPressed: () {
+              Navigator.of(dialogContext).pop();
               Navigator.of(context).pop();
-              this.context.go('/');
             },
             child: const Text('Home'),
           ),
           FilledButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              // Regenerate with same config.
-              ref.read(gameProvider.notifier).newGame(game.config);
+              Navigator.of(dialogContext).pop();
+              _game.newGame(game.config);
               _startTimer();
             },
             child: const Text('New Maze'),

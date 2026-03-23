@@ -1,31 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import 'providers/theme_provider.dart';
-import 'router.dart';
+import 'screens/home_screen.dart';
+import 'services/settings_service.dart';
+import 'services/storage_service.dart';
+import 'state/game_state.dart';
 import 'theme.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  runApp(const ProviderScope(child: MazesApp()));
+  final storage = StorageService();
+  final settings = SettingsService();
+  final gameNotifier = GameNotifier();
+  await Future.wait([storage.init(), settings.init()]);
+  runApp(MazesApp(
+    storage: storage,
+    settings: settings,
+    gameNotifier: gameNotifier,
+  ));
 }
 
-class MazesApp extends ConsumerWidget {
-  const MazesApp({super.key});
+class MazesApp extends StatelessWidget {
+  final StorageService storage;
+  final SettingsService settings;
+  final GameNotifier gameNotifier;
+
+  const MazesApp({
+    super.key,
+    required this.storage,
+    required this.settings,
+    required this.gameNotifier,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-
-    return MaterialApp.router(
-      title: 'Mazes',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: settings,
+      builder: (context, _) => MaterialApp(
+        title: 'Mazes',
+        debugShowCheckedModeBanner: false,
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: settings.themeMode,
+        home: HomeScreen(
+          storage: storage,
+          settings: settings,
+          gameNotifier: gameNotifier,
+        ),
+      ),
     );
   }
 }

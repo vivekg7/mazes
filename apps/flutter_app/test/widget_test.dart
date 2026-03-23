@@ -1,11 +1,22 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mazes/main.dart';
+import 'package:mazes/services/settings_service.dart';
+import 'package:mazes/services/storage_service.dart';
+import 'package:mazes/state/game_state.dart';
+import 'package:mazes/theme.dart';
+import 'package:flutter/material.dart';
+import 'package:mazes/screens/home_screen.dart';
 
 void main() {
   testWidgets('App renders home screen', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MazesApp()),
+      MaterialApp(
+        theme: lightTheme,
+        home: HomeScreen(
+          storage: StorageService(),
+          settings: SettingsService(),
+          gameNotifier: GameNotifier(),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 

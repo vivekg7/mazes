@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:maze_core/maze_core.dart';
 
-import '../providers/game_provider.dart';
+import '../services/settings_service.dart';
+import '../services/storage_service.dart';
+import '../state/game_state.dart';
+import 'play_screen.dart';
 
-class NewMazeScreen extends ConsumerStatefulWidget {
-  const NewMazeScreen({super.key});
+class NewMazeScreen extends StatefulWidget {
+  const NewMazeScreen({
+    super.key,
+    required this.storage,
+    required this.settings,
+    required this.gameNotifier,
+  });
+
+  final StorageService storage;
+  final SettingsService settings;
+  final GameNotifier gameNotifier;
 
   @override
-  ConsumerState<NewMazeScreen> createState() => _NewMazeScreenState();
+  State<NewMazeScreen> createState() => _NewMazeScreenState();
 }
 
-class _NewMazeScreenState extends ConsumerState<NewMazeScreen> {
+class _NewMazeScreenState extends State<NewMazeScreen> {
   CellType _cellType = CellType.square;
   DifficultyLevel _difficulty = DifficultyLevel.medium;
   Algorithm? _algorithm;
@@ -58,7 +68,6 @@ class _NewMazeScreenState extends ConsumerState<NewMazeScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Cell type.
           Text(
             'Cell Type',
             style: Theme.of(context).textTheme.titleMedium,
@@ -77,7 +86,6 @@ class _NewMazeScreenState extends ConsumerState<NewMazeScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Difficulty.
           Text(
             'Difficulty',
             style: Theme.of(context).textTheme.titleMedium,
@@ -96,7 +104,6 @@ class _NewMazeScreenState extends ConsumerState<NewMazeScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Algorithm.
           Text(
             'Algorithm',
             style: Theme.of(context).textTheme.titleMedium,
@@ -122,7 +129,6 @@ class _NewMazeScreenState extends ConsumerState<NewMazeScreen> {
           ),
           const SizedBox(height: 32),
 
-          // Generate button.
           FilledButton.icon(
             onPressed: _generate,
             icon: const Icon(Icons.play_arrow),
@@ -144,7 +150,14 @@ class _NewMazeScreenState extends ConsumerState<NewMazeScreen> {
       algorithm: _algorithm,
     );
 
-    ref.read(gameProvider.notifier).newGame(config);
-    context.go('/play');
+    widget.gameNotifier.newGame(config);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlayScreen(
+          storage: widget.storage,
+          gameNotifier: widget.gameNotifier,
+        ),
+      ),
+    );
   }
 }
