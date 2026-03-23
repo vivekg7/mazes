@@ -38,7 +38,6 @@ Every cell type defines the geometry of the maze grid. The app supports all of t
 | **Hexagonal**          | Honeycomb tiling. Six neighbors per cell, organic feel.      |
 | **Triangular**         | Alternating up/down triangles. Tight corridors, sharp turns. |
 | **Circular**           | Wedge-shaped cells radiating from a center point.            |
-| **Concentric Circles** | Rings of cells with passages between and across rings.       |
 | **Voronoi**            | Irregular organic cells from random point distributions.     |
 
 Each cell type can be combined with any compatible puzzle shape and generation algorithm.
@@ -50,7 +49,7 @@ Each cell type can be combined with any compatible puzzle shape and generation a
 Puzzle shape defines the outer boundary of the maze. The app generates a maze that fills the shape using the selected cell type.
 
 - **Rectangular grid** — Standard rectangle. Works with all cell types.
-- **Circular disc** — Round boundary. Natural fit for circular and concentric cell types, but works with any.
+- **Circular disc** — Round boundary. Natural fit for circular cell types, but works with any.
 - **Animal silhouettes** — Library of animal shapes (cat, dog, bird, fish, butterfly, etc.).
 - **Letters & numbers** — Alphabet and digit shapes for personalized mazes.
 - **Abstract shapes** — Stars, hearts, arrows, spirals, and other geometric forms.

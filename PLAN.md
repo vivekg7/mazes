@@ -35,7 +35,6 @@ Each cell type implements `Grid` with its own geometry and neighbor logic.
 - [ ] **HexGrid** — 6-neighbor honeycomb grid
 - [ ] **TriangleGrid** — alternating up/down triangles, 3 neighbors each
 - [ ] **CircularGrid** — wedge cells radiating from center
-- [ ] **ConcentricGrid** — ring-based cells with radial + ring connections
 - [ ] **VoronoiGrid** — irregular cells from random point seeds (Delaunay → Voronoi)
 
 Each grid type must:

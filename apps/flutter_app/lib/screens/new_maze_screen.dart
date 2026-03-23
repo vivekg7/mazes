@@ -32,7 +32,6 @@ class _NewMazeScreenState extends State<NewMazeScreen> {
     CellType.hexagonal: 'Hexagonal',
     CellType.triangular: 'Triangular',
     CellType.circular: 'Circular',
-    CellType.concentric: 'Concentric',
     CellType.voronoi: 'Voronoi',
   };
 

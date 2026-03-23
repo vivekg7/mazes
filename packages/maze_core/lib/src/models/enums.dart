@@ -4,7 +4,6 @@ enum CellType {
   hexagonal,
   triangular,
   circular,
-  concentric,
   voronoi,
 }
 

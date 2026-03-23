@@ -54,7 +54,7 @@ void main() {
 
   group('Enums', () {
     test('CellType has all expected values', () {
-      expect(CellType.values, hasLength(6));
+      expect(CellType.values, hasLength(5));
     });
 
     test('Algorithm has all expected values', () {
