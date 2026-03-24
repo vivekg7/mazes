@@ -40,19 +40,17 @@ class CircularCell extends Cell {
 
   @override
   List<({double x, double y})> get vertices {
-    // Approximate the arcs with line segments.
-    const segments = 8;
     final points = <({double x, double y})>[];
 
     // Inner arc (from start to end angle).
-    for (var i = 0; i <= segments; i++) {
-      final angle = startAngle + (endAngle - startAngle) * i / segments;
+    for (var i = 0; i <= _segments; i++) {
+      final angle = startAngle + (endAngle - startAngle) * i / _segments;
       points.add((x: innerRadius * cos(angle), y: innerRadius * sin(angle)));
     }
 
     // Outer arc (from end back to start angle).
-    for (var i = segments; i >= 0; i--) {
-      final angle = startAngle + (endAngle - startAngle) * i / segments;
+    for (var i = _segments; i >= 0; i--) {
+      final angle = startAngle + (endAngle - startAngle) * i / _segments;
       points.add((x: outerRadius * cos(angle), y: outerRadius * sin(angle)));
     }
 
@@ -65,6 +63,35 @@ class CircularCell extends Cell {
     final midAngle = (startAngle + endAngle) / 2;
     return (x: midRadius * cos(midAngle), y: midRadius * sin(midAngle));
   }
+
+  /// Edges 0.._segments-1: inner arc → inward.
+  /// Edge _segments: radial at endAngle → clockwise.
+  /// Edges _segments+1..2*_segments: outer arc → outward neighbor(s).
+  /// Edge 2*_segments+1: radial at startAngle → counterClockwise.
+  @override
+  Cell? neighborForEdge(int edgeIndex) {
+    if (edgeIndex < _segments) {
+      return inward;
+    } else if (edgeIndex == _segments) {
+      return clockwise;
+    } else if (edgeIndex < 2 * _segments + 1) {
+      if (outward.isEmpty) return null;
+      if (outward.length == 1) return outward.first;
+      // Multiple outward neighbors: outer arc runs end→start angle (reversed).
+      // Edge _segments+1 is at endAngle side, edge 2*_segments is at startAngle.
+      // Outward neighbors are ordered by column (ascending angle).
+      // So the last outward neighbor is at endAngle, first at startAngle.
+      final outerEdgeIdx = edgeIndex - _segments - 1; // 0 = endAngle side
+      final neighborIdx =
+          outward.length - 1 - (outerEdgeIdx * outward.length ~/ _segments);
+      return outward[neighborIdx.clamp(0, outward.length - 1)];
+    } else if (edgeIndex == 2 * _segments + 1) {
+      return counterClockwise;
+    }
+    return null;
+  }
+
+  static const _segments = 8;
 }
 
 /// A circular (polar) grid where cells are wedge-shaped and arranged in

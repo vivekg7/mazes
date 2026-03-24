@@ -60,6 +60,16 @@ class TriangleCell extends Cell {
       return (x: cx, y: row * _height + _height / 3);
     }
   }
+
+  /// Edge 0 = base edge (bottom for upright, top for inverted).
+  /// Edge 1 = right edge. Edge 2 = left edge.
+  @override
+  Cell? neighborForEdge(int edgeIndex) => switch (edgeIndex) {
+        0 => base,
+        1 => right,
+        2 => left,
+        _ => null,
+      };
 }
 
 /// A grid of alternating up/down [TriangleCell]s.

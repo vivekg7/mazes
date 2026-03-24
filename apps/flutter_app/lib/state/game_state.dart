@@ -220,12 +220,6 @@ class GameNotifier extends ChangeNotifier {
       CellType.hexagonal => HexGrid(config.rows, config.columns),
       CellType.triangular => TriangleGrid(config.rows, config.columns),
       CellType.circular => CircularGrid(config.rows),
-      CellType.voronoi => VoronoiGrid(
-          config.rows,
-          config.columns,
-          cellCount: config.rows * config.columns ~/ 2,
-          seed: config.seed,
-        ),
     };
   }
 

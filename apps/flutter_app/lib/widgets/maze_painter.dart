@@ -196,10 +196,6 @@ class MazePainter extends CustomPainter {
       final vertices = cell.vertices;
       if (vertices.isEmpty) continue;
 
-      // Draw each edge of the cell polygon, but skip edges where there's
-      // a linked neighbor (open passage).
-      final neighbors = cell.neighbors;
-
       for (var i = 0; i < vertices.length; i++) {
         final v1 = toCanvas(vertices[i].x, vertices[i].y);
         final v2 = toCanvas(
@@ -207,30 +203,11 @@ class MazePainter extends CustomPainter {
           vertices[(i + 1) % vertices.length].y,
         );
 
-        // Check if this edge is shared with a linked neighbor.
-        // We use a heuristic: if the midpoint of this edge is close to the
-        // midpoint between this cell and a linked neighbor, it's an open passage.
-        final edgeMid = Offset((v1.dx + v2.dx) / 2, (v1.dy + v2.dy) / 2);
-        var isPassage = false;
+        // Check if this edge is a passage to a linked neighbor.
+        final neighbor = cell.neighborForEdge(i);
+        if (neighbor != null && cell.isLinked(neighbor)) continue;
 
-        for (final neighbor in neighbors) {
-          if (!cell.isLinked(neighbor)) continue;
-
-          // Find the shared edge by checking if the edge midpoint lies
-          // between the two cell centers.
-          final nc = toCanvas(neighbor.center.x, neighbor.center.y);
-          final cc = toCanvas(cell.center.x, cell.center.y);
-          final neighborMid = Offset((nc.dx + cc.dx) / 2, (nc.dy + cc.dy) / 2);
-
-          if ((edgeMid - neighborMid).distance < cellSize * 0.5) {
-            isPassage = true;
-            break;
-          }
-        }
-
-        if (!isPassage) {
-          canvas.drawLine(v1, v2, isVisible ? wallPaint : fogWallPaint);
-        }
+        canvas.drawLine(v1, v2, isVisible ? wallPaint : fogWallPaint);
       }
     }
   }

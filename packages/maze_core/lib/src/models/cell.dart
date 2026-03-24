@@ -70,6 +70,14 @@ abstract class Cell {
   /// Center point of this cell for rendering.
   ({double x, double y}) get center;
 
+  /// Returns the neighbor on the other side of edge [edgeIndex], or null for
+  /// boundary edges.
+  ///
+  /// Edge i connects `vertices[i]` to `vertices[(i + 1) % vertices.length]`.
+  /// Subclasses override this to provide exact edge-to-neighbor mapping for
+  /// accurate wall rendering. The default returns null (all edges are walls).
+  Cell? neighborForEdge(int edgeIndex) => null;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

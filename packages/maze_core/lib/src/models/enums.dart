@@ -4,7 +4,6 @@ enum CellType {
   hexagonal,
   triangular,
   circular,
-  voronoi,
 }
 
 /// The outer boundary shape of the maze.

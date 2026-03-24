@@ -38,7 +38,6 @@ Every cell type defines the geometry of the maze grid. The app supports all of t
 | **Hexagonal**          | Honeycomb tiling. Six neighbors per cell, organic feel.      |
 | **Triangular**         | Alternating up/down triangles. Tight corridors, sharp turns. |
 | **Circular**           | Wedge-shaped cells radiating from a center point.            |
-| **Voronoi**            | Irregular organic cells from random point distributions.     |
 
 Each cell type can be combined with any compatible puzzle shape and generation algorithm.
 

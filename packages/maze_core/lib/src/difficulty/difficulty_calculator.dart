@@ -62,7 +62,6 @@ class DifficultyCalculator {
           rows: (base.rows * 0.7).round(),
           columns: base.columns,
         ),
-      CellType.voronoi => base,
     };
   }
 

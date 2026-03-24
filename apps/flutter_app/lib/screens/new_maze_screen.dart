@@ -32,7 +32,6 @@ class _NewMazeScreenState extends State<NewMazeScreen> {
     CellType.hexagonal: 'Hexagonal',
     CellType.triangular: 'Triangular',
     CellType.circular: 'Circular',
-    CellType.voronoi: 'Voronoi',
   };
 
   static const _difficultyLabels = {

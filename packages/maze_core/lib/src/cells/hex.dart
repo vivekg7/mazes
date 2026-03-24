@@ -50,6 +50,19 @@ class HexCell extends Cell {
     final cy = row * height + (column.isOdd ? height / 2 : 0) + height / 2;
     return (x: cx, y: cy);
   }
+
+  /// Flat-top hex vertices: E(0°), SE(60°), SW(120°), W(180°), NW(240°), NE(300°).
+  /// Edges: 0=SE, 1=S, 2=SW, 3=NW, 4=N, 5=NE.
+  @override
+  Cell? neighborForEdge(int edgeIndex) => switch (edgeIndex) {
+        0 => southeast,
+        1 => south,
+        2 => southwest,
+        3 => northwest,
+        4 => north,
+        5 => northeast,
+        _ => null,
+      };
 }
 
 /// A honeycomb grid of [HexCell]s using flat-top hex orientation.

@@ -33,6 +33,15 @@ class SquareCell extends Cell {
 
   @override
   ({double x, double y}) get center => (x: column + 0.5, y: row + 0.5);
+
+  @override
+  Cell? neighborForEdge(int edgeIndex) => switch (edgeIndex) {
+        0 => north,
+        1 => east,
+        2 => south,
+        3 => west,
+        _ => null,
+      };
 }
 
 /// A rectangular grid of [SquareCell]s.
