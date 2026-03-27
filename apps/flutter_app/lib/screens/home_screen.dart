@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBody() {
     return switch (_navIndex) {
-      1 => const StatsScreen(),
+      1 => StatsScreen(storage: widget.storage),
       2 => SettingsScreen(settings: widget.settings),
       _ => _HomeContent(
           storage: widget.storage,
