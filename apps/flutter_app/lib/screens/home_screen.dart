@@ -5,6 +5,7 @@ import '../services/settings_service.dart';
 import '../services/storage_service.dart';
 import '../state/game_state.dart';
 import 'bookmarks_screen.dart';
+import 'export_screen.dart';
 import 'new_maze_screen.dart';
 import 'play_screen.dart';
 import 'saved_games_screen.dart';
@@ -187,6 +188,19 @@ class _HomeContent extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ExportScreen(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('Export PDF'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
                 const SizedBox(height: 48),
               ],
             ),
