@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:maze_core/maze_core.dart';
 
+import '../models/saved_game.dart';
+
 /// The complete state of a maze game in progress.
 class GameState {
   const GameState({
@@ -75,7 +77,10 @@ class GameNotifier extends ChangeNotifier {
 
   /// Generates a new maze and initializes the game state.
   void newGame(MazeConfig config) {
-    final rng = Random(config.seed);
+    // Ensure we always have a seed for deterministic regeneration.
+    final seed = config.seed ?? Random().nextInt(1 << 32);
+    config = config.copyWith(seed: seed);
+    final rng = Random(seed);
 
     final grid = _createGrid(config);
     final generator = _createGenerator(config.algorithm);
@@ -211,6 +216,47 @@ class GameNotifier extends ChangeNotifier {
   void toggleSolution() {
     if (_state == null) return;
     _state = _state!.copyWith(showSolution: !_state!.showSolution);
+    notifyListeners();
+  }
+
+  /// Restores a game from a [SavedGame] snapshot.
+  ///
+  /// Regenerates the maze from the config (deterministic via seed), then
+  /// maps saved coordinate pairs back to Cell objects.
+  void loadSavedGame(SavedGame save) {
+    // Regenerate the exact same maze.
+    newGame(save.config);
+    final s = _state!;
+
+    // Map (row, col) pairs back to Cell objects.
+    final playerPath = save.playerPath
+        .map((pos) => s.grid.cellAt(pos.$1, pos.$2))
+        .whereType<Cell>()
+        .toList();
+
+    final breadcrumbs = save.breadcrumbs
+        .map((pos) => s.grid.cellAt(pos.$1, pos.$2))
+        .whereType<Cell>()
+        .toSet();
+
+    final wallMarks = <Cell, Set<Cell>>{};
+    for (final entry in save.wallMarks.entries) {
+      final cell = s.grid.cellAt(entry.key.$1, entry.key.$2);
+      if (cell == null) continue;
+      final neighbors = entry.value
+          .map((pos) => s.grid.cellAt(pos.$1, pos.$2))
+          .whereType<Cell>()
+          .toSet();
+      if (neighbors.isNotEmpty) wallMarks[cell] = neighbors;
+    }
+
+    _state = s.copyWith(
+      playerPath: playerPath.isNotEmpty ? playerPath : [s.startCell],
+      undoStack: const [],
+      elapsedMs: save.elapsedMs,
+      breadcrumbs: breadcrumbs,
+      wallMarks: wallMarks,
+    );
     notifyListeners();
   }
 

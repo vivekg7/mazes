@@ -65,6 +65,34 @@ class MazeConfig {
     );
   }
 
+  /// Converts to a JSON-compatible map.
+  Map<String, dynamic> toJson() => {
+        'cellType': cellType.name,
+        'puzzleShape': puzzleShape.name,
+        'shapeVariant': shapeVariant,
+        'algorithm': algorithm?.name,
+        'difficulty': difficulty.name,
+        'rows': rows,
+        'columns': columns,
+        'seed': seed,
+      };
+
+  /// Creates a [MazeConfig] from a JSON map.
+  factory MazeConfig.fromJson(Map<String, dynamic> json) {
+    return MazeConfig(
+      cellType: CellType.values.byName(json['cellType'] as String),
+      puzzleShape: PuzzleShape.values.byName(json['puzzleShape'] as String),
+      shapeVariant: json['shapeVariant'] as String?,
+      algorithm: json['algorithm'] != null
+          ? Algorithm.values.byName(json['algorithm'] as String)
+          : null,
+      difficulty: DifficultyLevel.values.byName(json['difficulty'] as String),
+      rows: json['rows'] as int,
+      columns: json['columns'] as int,
+      seed: json['seed'] as int?,
+    );
+  }
+
   @override
   String toString() =>
       'MazeConfig($cellType, ${rows}x$columns, $difficulty, $algorithm)';
