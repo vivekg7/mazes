@@ -4,6 +4,7 @@ import 'package:maze_core/maze_core.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
 import '../state/game_state.dart';
+import '../widgets/maze_icon.dart';
 import 'bookmarks_screen.dart';
 import 'export_screen.dart';
 import 'new_maze_screen.dart';
@@ -29,46 +30,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _navIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _navIndex,
-        onDestinationSelected: (index) => setState(() => _navIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+      body: _HomeContent(
+        storage: widget.storage,
+        settings: widget.settings,
+        gameNotifier: widget.gameNotifier,
       ),
     );
-  }
-
-  Widget _buildBody() {
-    return switch (_navIndex) {
-      1 => StatsScreen(storage: widget.storage),
-      2 => SettingsScreen(settings: widget.settings),
-      _ => _HomeContent(
-          storage: widget.storage,
-          settings: widget.settings,
-          gameNotifier: widget.gameNotifier,
-        ),
-    };
   }
 }
 
@@ -94,17 +64,14 @@ class _HomeContent extends StatelessWidget {
         final hasBookmarks = storage.bookmarks.isNotEmpty;
 
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
               children: [
-                const Spacer(),
-                Icon(
-                  Icons.grid_4x4,
-                  size: 80,
-                  color: theme.colorScheme.primary,
-                ),
+                const SizedBox(height: 48),
+                const MazeIcon(size: 80),
                 const SizedBox(height: 16),
                 Text(
                   'Mazes',
@@ -121,89 +88,123 @@ class _HomeContent extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const Spacer(),
-                if (hasSaves) ...[
-                  FilledButton.icon(
-                    onPressed: () => _resumeLatestSave(context),
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Continue'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                  if (storage.saves.length > 1)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => _openSavedGames(context),
-                        child: const Text('See all saved games'),
+                const SizedBox(height: 48),
+                IntrinsicWidth(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (hasSaves) ...[
+                        FilledButton.icon(
+                          onPressed: () => _resumeLatestSave(context),
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Continue'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                        if (storage.saves.length > 1)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => _openSavedGames(context),
+                              child: const Text('See all saved games'),
+                            ),
+                          )
+                        else
+                          const SizedBox(height: 12),
+                      ],
+                      if (!hasSaves)
+                        FilledButton.icon(
+                          onPressed: () => _startQuickPlay(context),
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Quick Play'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        )
+                      else
+                        OutlinedButton.icon(
+                          onPressed: () => _startQuickPlay(context),
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Quick Play'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => NewMazeScreen(
+                              storage: storage,
+                              settings: settings,
+                              gameNotifier: gameNotifier,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.tune),
+                        label: const Text('Custom Maze'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
                       ),
-                    )
-                  else
-                    const SizedBox(height: 12),
-                ],
-                if (!hasSaves)
-                  FilledButton.icon(
-                    onPressed: () => _startQuickPlay(context),
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Quick Play'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  )
-                else
-                  OutlinedButton.icon(
-                    onPressed: () => _startQuickPlay(context),
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Quick Play'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => NewMazeScreen(
-                        storage: storage,
-                        settings: settings,
-                        gameNotifier: gameNotifier,
-                      ),
-                    ),
-                  ),
-                  icon: const Icon(Icons.tune),
-                  label: const Text('Custom Maze'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-                if (hasBookmarks) ...[
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => _openBookmarks(context),
-                    icon: const Icon(Icons.bookmark_outline),
-                    label: const Text('Bookmarks'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ExportScreen(),
-                    ),
-                  ),
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Export PDF'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                      if (hasBookmarks) ...[
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () => _openBookmarks(context),
+                          icon: const Icon(Icons.bookmark_outline),
+                          label: const Text('Bookmarks'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(height: 48),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 16,
+                  runSpacing: 12,
+                  children: [
+                    _navButton(
+                      context,
+                      icon: Icons.bar_chart,
+                      label: 'Stats',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => StatsScreen(storage: storage),
+                        ),
+                      ),
+                    ),
+                    _navButton(
+                      context,
+                      icon: Icons.picture_as_pdf,
+                      label: 'PDF',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ExportScreen(),
+                        ),
+                      ),
+                    ),
+                    _navButton(
+                      context,
+                      icon: Icons.settings,
+                      label: 'Settings',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => SettingsScreen(settings: settings),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
               ],
+              ),
             ),
+          ),
           ),
         );
       },
@@ -251,6 +252,34 @@ class _HomeContent extends StatelessWidget {
           gameNotifier: gameNotifier,
         ),
       ),
+    );
+  }
+
+  Widget _navButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton.outlined(
+          icon: Icon(icon),
+          onPressed: onPressed,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 
