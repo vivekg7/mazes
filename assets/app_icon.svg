@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Teal background (host OS applies rounding) -->
+  <rect width="1024" height="1024" fill="#1B5E5E"/>
+
+  <!-- Maze logo in white, centered at (512, 512), scaled 8x from 64px version -->
+  <g fill="none" stroke="white" stroke-width="28" stroke-linecap="round"
+     transform="translate(512, 512)">
+
+    <!-- Outer ring r=216, gap at lower-left -->
+    <path d="M -187.2 108 A 216 216 0 1 1 -108 187.2"/>
+
+    <!-- Middle ring r=144, gap at upper-left -->
+    <path d="M -72 -124.7 A 144 144 0 1 1 -124.7 -72"/>
+
+    <!-- Inner ring r=72, gap at upper-right -->
+    <path d="M 68 -24.8 A 72 72 0 1 1 24.8 -68"/>
+
+    <!-- Radial walls -->
+    <line x1="72" y1="0" x2="144" y2="0"/>
+    <line x1="0" y1="144" x2="0" y2="216"/>
+    <line x1="-72" y1="0" x2="-144" y2="0"/>
+    <line x1="0" y1="-144" x2="0" y2="-216"/>
+
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="20" fill="white" stroke="none"/>
+  </g>
+</svg>

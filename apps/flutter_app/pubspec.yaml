@@ -35,18 +35,20 @@ flutter_launcher_icons:
     generate: true
   web:
     generate: true
-  image_path: "assets/icon/icon_1024.png"
-  adaptive_icon_background: "#1a1a2e"
-  adaptive_icon_foreground: "assets/icon/icon_1024.png"
+  image_path: "assets/app_icon.png"
+  adaptive_icon_background: "#1B5E5E"
+  adaptive_icon_foreground: "assets/app_icon.png"
 
 flutter_native_splash:
-  color: "#1a1a2e"
-  color_dark: "#1a1a2e"
-  image: "assets/icon/icon_1024.png"
-  image_dark: "assets/icon/icon_1024.png"
+  color: "#1B5E5E"
+  color_dark: "#1B5E5E"
+  image: "assets/app_icon.png"
+  image_dark: "assets/app_icon.png"
   android: true
   ios: true
   web: true
   android_12:
-    color: "#1a1a2e"
-    color_dark: "#1a1a2e"
+    color: "#1B5E5E"
+    color_dark: "#1B5E5E"
+    image: "assets/app_icon.png"
+    image_dark: "assets/app_icon.png"

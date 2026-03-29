@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!--
+    Solvable path: outside → lower-left outer gap → CW in outer corridor
+    → upper-left middle gap → CW in inner corridor → upper-right inner gap → center
+
+    Outer corridor walls at 90° (bottom) and 270° (top)
+    Inner corridor walls at 0° (right) and 180° (left)
+  -->
+  <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round">
+
+    <!-- Outer ring r=27, gap at lower-left (120° to 150°) -->
+    <path d="M 8.6 45.5 A 27 27 0 1 1 18.5 55.4"/>
+
+    <!-- Middle ring r=18, gap at upper-left (210° to 240°) -->
+    <path d="M 23 16.4 A 18 18 0 1 1 16.4 23"/>
+
+    <!-- Inner ring r=9, gap at upper-right (290° to 340°) -->
+    <path d="M 40.5 28.9 A 9 9 0 1 1 35.1 23.5"/>
+
+    <!-- Radial walls -->
+    <!-- 3 o'clock: inner corridor (r=9 to r=18) -->
+    <line x1="41" y1="32" x2="50" y2="32"/>
+    <!-- 6 o'clock: outer corridor (r=18 to r=27) -->
+    <line x1="32" y1="50" x2="32" y2="59"/>
+    <!-- 9 o'clock: inner corridor (r=9 to r=18) -->
+    <line x1="23" y1="32" x2="14" y2="32"/>
+    <!-- 12 o'clock: outer corridor (r=18 to r=27) -->
+    <line x1="32" y1="14" x2="32" y2="5"/>
+
+    <!-- Center dot -->
+    <circle cx="32" cy="32" r="2.5" fill="currentColor" stroke="none"/>
+  </g>
+</svg>
