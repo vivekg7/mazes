@@ -10,7 +10,7 @@ void main() {
   testWidgets('App renders home screen', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: lightTheme,
+        theme: buildLightTheme(AppColor.teal.seed),
         home: HomeScreen(
           storage: StorageService(),
           settings: SettingsService(),

@@ -35,18 +35,24 @@ class MazesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: settings,
-      builder: (context, _) => MaterialApp(
+      builder: (context, _) {
+        final seed = settings.appColor.seed;
+        final mode = settings.themeMode;
+        return MaterialApp(
         title: 'Mazes',
         debugShowCheckedModeBanner: false,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: settings.themeMode,
+        theme: buildLightTheme(seed),
+        darkTheme: mode.isAmoled
+            ? buildAmoledTheme(seed)
+            : buildDarkTheme(seed),
+        themeMode: mode.flutterMode,
         home: HomeScreen(
           storage: storage,
           settings: settings,
           gameNotifier: gameNotifier,
         ),
-      ),
+      );
+      },
     );
   }
 }
