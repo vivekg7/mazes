@@ -13,6 +13,8 @@ class PdfExportService {
   pw.Document generate({
     required MazeConfig config,
     required int count,
+    bool includeSolutions = true,
+    void Function(int completed)? onProgress,
   }) {
     final pdf = pw.Document(
       title: 'Mazes',
@@ -41,6 +43,8 @@ class PdfExportService {
         endCell: longest.end,
         solution: solution,
       ));
+
+      onProgress?.call(i + 1);
     }
 
     // Puzzle pages.
@@ -49,8 +53,10 @@ class PdfExportService {
     }
 
     // Solution pages.
-    for (final maze in mazes) {
-      pdf.addPage(_buildMazePage(maze, showSolution: true));
+    if (includeSolutions) {
+      for (final maze in mazes) {
+        pdf.addPage(_buildMazePage(maze, showSolution: true));
+      }
     }
 
     return pdf;
