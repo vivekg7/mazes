@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
@@ -8,6 +9,10 @@ import 'theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   final storage = StorageService();
   final settings = SettingsService();
   final gameNotifier = GameNotifier();
